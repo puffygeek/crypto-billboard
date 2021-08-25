@@ -1,0 +1,15 @@
+{
+  "name": "Basic banner",
+  "description": "Basic banner description",
+  "image": "ipfs://QmaoJoarFS5RGwAzb66Rxm3hwdQzMdS8totKg9SimHUt7V",
+  "attributes": [
+    {
+      "trait_type": "Point",
+      "value": "1"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Mocha"
+    }
+  ]
+}
