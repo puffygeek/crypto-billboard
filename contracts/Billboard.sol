@@ -16,35 +16,18 @@ contract Billboard is Ownable, ReentrancyGuard, ERC721URIStorage {
   address public publisher;
   uint public totalPaid;
   uint public totalMessages;
-  string public contractURI;
+  
 
   Counters.Counter private _tokenIds;
   string private _baseURIparam;
+  string private _contractURI;
 
-  constructor(uint _price, string memory _message, string memory baseURI, string memory _contractURI) ERC721("Billboard", "BLBD") {
+  constructor(uint _price, string memory _message, string memory baseURI, string memory defaultContractURI) ERC721("Billboard", "BLBD") {
     price = _price;
     message = _message;
     publisher = msg.sender;
     setBaseURI(baseURI);
-    contractURI = _contractURI;
-  }
-
-  function _baseURI() internal view virtual override returns (string memory) {
-    return _baseURIparam;
-  }
-
-  function setBaseURI(string memory baseURI) public onlyOwner {
-    _baseURIparam = baseURI;
-  }
-
-  function _mintNFT(address user, string memory tokenURI) internal returns (uint256) {
-    _tokenIds.increment();
-
-    uint256 newItemId = _tokenIds.current();
-    _mint(user, newItemId);
-    _setTokenURI(newItemId, tokenURI);
-
-    return newItemId;
+    _contractURI = defaultContractURI;
   }
 
   function setMessage(string memory _message) public payable nonReentrant {
@@ -63,6 +46,10 @@ contract Billboard is Ownable, ReentrancyGuard, ERC721URIStorage {
       return (message, price, publisher);
   }
 
+  function contractURI() public view returns (string memory) {
+      return _contractURI;
+  }
+
   function withdrawAll() public payable onlyOwner {
     require(payable(msg.sender).send(address(this).balance));
   }
@@ -71,8 +58,26 @@ contract Billboard is Ownable, ReentrancyGuard, ERC721URIStorage {
     return _mintNFT(to, tokenURI);
   }
 
-  function setContractURI(string memory _contractURI) public onlyOwner {
-    contractURI = _contractURI;
+  function setContractURI(string memory defaultContractURI) public onlyOwner {
+    _contractURI = defaultContractURI;
+  }
+
+  function setBaseURI(string memory baseURI) public onlyOwner {
+    _baseURIparam = baseURI;
+  }
+
+  function _baseURI() internal view virtual override returns (string memory) {
+    return _baseURIparam;
+  }
+
+  function _mintNFT(address user, string memory tokenURI) internal returns (uint256) {
+    _tokenIds.increment();
+
+    uint256 newItemId = _tokenIds.current();
+    _mint(user, newItemId);
+    _setTokenURI(newItemId, tokenURI);
+
+    return newItemId;
   }
 
 }
