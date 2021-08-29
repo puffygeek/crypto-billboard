@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -7,76 +7,90 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract Billboard is Ownable, ReentrancyGuard, ERC721 {
-  event NewMessage(string message, uint price, address publisher);
-  
-  using Counters for Counters.Counter;
+    event NewMessage(string message, uint256 price, address publisher);
 
-  string public message;
-  uint public price;
-  address public publisher;
-  uint public totalPaid;
-  uint public totalMessages;
-  
+    using Counters for Counters.Counter;
 
-  Counters.Counter private _tokenIds;
-  string private _baseURIparam;
-  string private _contractURI;
+    string public message;
+    uint256 public price;
+    address public publisher;
+    uint256 public totalPaid;
+    uint256 public totalMessages;
 
-  constructor(uint _price, string memory _message, string memory baseURI, string memory defaultContractURI) ERC721("Billboard", "BLBD") {
-    price = _price;
-    message = _message;
-    publisher = msg.sender;
-    setBaseURI(baseURI);
-    _contractURI = defaultContractURI;
-  }
+    Counters.Counter private _tokenIds;
+    string private _baseURIparam;
+    string private _contractURI;
 
-  function setMessage(string memory _message) public payable nonReentrant {
-    require(msg.value > price, "Payment needs to be above the current price");
+    constructor(
+        uint256 startPrice,
+        string memory startMessage,
+        string memory baseURI,
+        string memory defaultContractURI
+    ) ERC721("Billboard", "BLBD") {
+        price = startPrice;
+        message = startMessage;
+        publisher = msg.sender;
+        setBaseURI(baseURI);
+        _contractURI = defaultContractURI;
+    }
 
-    price = msg.value;
-    totalPaid += msg.value;
-    totalMessages += 1;
-    publisher = msg.sender;
-    _mintNFT(msg.sender);
-    message = _message;
-    emit NewMessage(message, price, publisher);
-  }
+    function setMessage(string memory newMessage) public payable nonReentrant {
+        require(
+            msg.value > price,
+            "Payment needs to be above the current price"
+        );
 
-  function getInfo() public view returns (string memory, uint, address) {
-      return (message, price, publisher);
-  }
+        price = msg.value;
+        totalPaid += msg.value;
+        totalMessages += 1;
+        publisher = msg.sender;
+        _mintNFT(msg.sender);
+        message = newMessage;
+        emit NewMessage(message, price, publisher);
+    }
 
-  function contractURI() public view returns (string memory) {
-      return _contractURI;
-  }
+    function getInfo()
+        public
+        view
+        returns (
+            string memory,
+            uint256,
+            address
+        )
+    {
+        return (message, price, publisher);
+    }
 
-  function withdrawAll() public payable onlyOwner {
-    require(payable(msg.sender).send(address(this).balance));
-  }
+    function contractURI() public view returns (string memory) {
+        return _contractURI;
+    }
 
-  function grantNewNFT(address to) public onlyOwner returns (uint256) {
-    return _mintNFT(to);
-  }
+    function withdrawAll() public payable onlyOwner {
+        require(payable(msg.sender).send(address(this).balance));
+    }
 
-  function setContractURI(string memory defaultContractURI) public onlyOwner {
-    _contractURI = defaultContractURI;
-  }
+    function grantNewNFT(address to) public onlyOwner returns (uint256) {
+        return _mintNFT(to);
+    }
 
-  function setBaseURI(string memory baseURI) public onlyOwner {
-    _baseURIparam = baseURI;
-  }
+    function setContractURI(string memory defaultContractURI) public onlyOwner {
+        _contractURI = defaultContractURI;
+    }
 
-  function _baseURI() internal view virtual override returns (string memory) {
-    return _baseURIparam;
-  }
+    function setBaseURI(string memory baseURI) public onlyOwner {
+        _baseURIparam = baseURI;
+    }
 
-  function _mintNFT(address user) internal returns (uint256) {
-    _tokenIds.increment();
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _baseURIparam;
+    }
 
-    uint256 newItemId = _tokenIds.current();
-    _mint(user, newItemId);
+    function _mintNFT(address user) internal returns (uint256) {
+        _tokenIds.increment();
 
-    return newItemId;
-  }
+        uint256 newItemId = _tokenIds.current();
+        _mint(user, newItemId);
 
+        return newItemId;
+    }
 }
