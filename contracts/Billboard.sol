@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract Billboard is Ownable, ReentrancyGuard, ERC721URIStorage {
+contract Billboard is Ownable, ReentrancyGuard, ERC721 {
   event NewMessage(string message, uint price, address publisher);
   
   using Counters for Counters.Counter;
@@ -37,7 +37,7 @@ contract Billboard is Ownable, ReentrancyGuard, ERC721URIStorage {
     totalPaid += msg.value;
     totalMessages += 1;
     publisher = msg.sender;
-    _mintNFT(msg.sender, "1.json");
+    _mintNFT(msg.sender);
     message = _message;
     emit NewMessage(message, price, publisher);
   }
@@ -54,8 +54,8 @@ contract Billboard is Ownable, ReentrancyGuard, ERC721URIStorage {
     require(payable(msg.sender).send(address(this).balance));
   }
 
-  function grantNewNFT(address to, string memory tokenURI) public onlyOwner returns (uint256) {
-    return _mintNFT(to, tokenURI);
+  function grantNewNFT(address to) public onlyOwner returns (uint256) {
+    return _mintNFT(to);
   }
 
   function setContractURI(string memory defaultContractURI) public onlyOwner {
@@ -70,12 +70,11 @@ contract Billboard is Ownable, ReentrancyGuard, ERC721URIStorage {
     return _baseURIparam;
   }
 
-  function _mintNFT(address user, string memory tokenURI) internal returns (uint256) {
+  function _mintNFT(address user) internal returns (uint256) {
     _tokenIds.increment();
 
     uint256 newItemId = _tokenIds.current();
     _mint(user, newItemId);
-    _setTokenURI(newItemId, tokenURI);
 
     return newItemId;
   }

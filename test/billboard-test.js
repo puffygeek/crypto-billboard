@@ -3,7 +3,6 @@ const { expect } = require("chai");
 const START_PRICE = ethers.utils.parseEther("0.01");
 const START_MSG = "Hello, world!";
 const BASE_URI = "https://cryptobillboard.org/NFT/";
-const NFT_URI = "1.json";
 const C_URI = "https://cryptobillboard.org/contractURI.json";
 
 describe("Billboard", function () {
@@ -102,7 +101,7 @@ describe("Billboard", function () {
 
         it("has the right NFT URI", async function () {
           const uri = await billboard.tokenURI(1); // 1=owner on init
-          expect(uri).to.equal(BASE_URI + NFT_URI);
+          expect(uri).to.equal(BASE_URI + "1");
         });
       });
 
@@ -140,14 +139,14 @@ describe("Billboard", function () {
     describe("non owner", function () {
       it("errors on non-owner user call", async function () {
         await expect(
-          billboard.connect(addr2).grantNewNFT(addr3.address, "2.json")
+          billboard.connect(addr2).grantNewNFT(addr3.address)
         ).to.be.revertedWith("Ownable: caller is not the owner");
       });
     });
 
     describe("owner", function () {
       before(async function () {
-        await billboard.grantNewNFT(addr3.address, "2.json");
+        await billboard.grantNewNFT(addr3.address);
       });
 
       it("grants NFT as admin", async function () {
@@ -157,7 +156,7 @@ describe("Billboard", function () {
 
       it("sets the right URI", async function () {
         const uri = await billboard.tokenURI(2);
-        expect(uri).to.equal(BASE_URI + "2.json");
+        expect(uri).to.equal(BASE_URI + "2");
       });
     });
   });
